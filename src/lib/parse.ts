@@ -73,14 +73,22 @@ type SignificantName = keyof typeof significantBitShifts;
 const significantOrder = Object.keys(significantBitShifts) as SignificantName[];
 
 const specialStrs: Record<string, SignificantName> = {
-  d: "directory",
-  b: "blockDevice",
-  c: "characterDevice",
   l: "symbolicLink",
+  b: "blockDevice",
   s: "socket",
+  d: "directory",
+  c: "characterDevice",
   p: "namedPipe",
 };
 
+const _specialStrs = {
+  symbolicLink: "l",
+  blockDevice: "b",
+  socket: "s",
+  directory: "d",
+  characterDevice: "c",
+  namedPipe: "p",
+};
 export interface Triad {
   read: boolean;
   write: boolean;
@@ -137,7 +145,7 @@ const asRwx = (t: Triad) => [
 ];
 const asSpecial = (s: Special) =>
   significantOrder
-    .map((name) => (s[name] ? specialStrs[name] : ""))
+    .map((name) => (s[name] ? _specialStrs[name] : ""))
     .filter(Boolean)
     .join("") || "-";
 
@@ -200,20 +208,7 @@ const stringOrNumber = <T>(
     throw new Error(`invalid string/number ${input}`);
   }
 };
-export const octalToDecimal = (octal: string) => {
-  const parts = octal.split("").map((digit) => parseInt(digit));
-  parts.forEach((digit) => {
-    if (digit > 7) {
-      throw new Error(`some digits are too large in ${octal}`);
-    }
-  });
-  return parts
-    .reverse()
-    .reduce(
-      (n: number, part: number, i: number) => (n += Math.pow(8, i) * part),
-      0
-    );
-};
+export const octalToDecimal = (octal: string) => parseInt(octal, 8);
 const parseOctalStr = (octal: string): FileMode => {
   return parseNumber(octalToDecimal(octal));
 };
@@ -226,7 +221,7 @@ const blankSpecial = () =>
     (a, name) => Object.assign(a, { [name]: false }),
     {} as Record<SignificantName, boolean>
   );
-const blankFileMode = (): FileMode => ({
+export const blankFileMode = (): FileMode => ({
   user: blankTriad(),
   group: blankTriad(),
   other: blankTriad(),
@@ -284,8 +279,11 @@ export const toDecimal = (f: FileMode): number => {
   return n;
 };
 
+export const numberToOctal = (n: number, digits: number) =>
+  n.toString(8).padStart(digits, "0");
 // const parseHex = (h: string | number)  =>
-export const toOctal = (f: FileMode): string =>
-  toDecimal(f).toString(8).padStart(5, "0");
+export const modeToOctal = (f: FileMode): string =>
+  numberToOctal(toDecimal(f), 5);
 // TODO: symbolic
 // TODO: hex ('cause why not)
+// TODO: create os-sets of Specials

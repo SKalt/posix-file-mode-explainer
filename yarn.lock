@@ -1930,7 +1930,7 @@ __metadata:
     rollup-plugin-terser: ^7.0.0
     sapper: ^0.28.0
     sirv: ^1.0.0
-    svelte: ^3.17.3
+    svelte: ^3.31.0
     svelte-check: ^1.0.46
     svelte-preprocess: ^4.3.0
     ts-jest: ^26.4.4
@@ -6499,10 +6499,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"svelte@npm:^3.17.3":
-  version: 3.30.0
-  resolution: "svelte@npm:3.30.0"
-  checksum: 2498c0abd4ac7cf8458372a17e5cf79e8ddff2edd54c88c817d1676dd30bdc9b873f3d1aad49978d84f4856156b4cbed6466f38681d373bb1f9108a0e70eeed3
+"svelte@npm:^3.31.0":
+  version: 3.31.0
+  resolution: "svelte@npm:3.31.0"
+  checksum: 16a09376f397a68aec78b925bf0adfe378f052e985dcadcca290a340b65b4a4f883374c710a9ae217c2674b76563e5f7c56ec8d3270594ef9ff5d504bafe0542
   languageName: node
   linkType: hard
 
