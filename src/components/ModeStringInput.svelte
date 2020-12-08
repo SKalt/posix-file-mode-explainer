@@ -1,108 +1,26 @@
 <script lang="ts">
-  import type { FileMode, Triad } from "../lib/parse";
+  import type { FileMode } from "../lib/parse";
   import { modeAsString, blankFileMode, parseStr } from "../lib/parse";
   import { afterUpdate } from "svelte";
-  export let value: FileMode = blankFileMode();
+  import type { Writable } from "svelte/store";
+  import { writable } from "svelte/store";
+  export let store: Writable<FileMode> = writable(blankFileMode());
+  let value: FileMode;
+  const unsubscribe = store.subscribe((v) => (value = v));
   let caretPosition = 0;
   let modeString = modeAsString(value);
   let input: HTMLInputElement;
   afterUpdate(() => {
     input.selectionEnd = caretPosition;
   });
-  // const getCurrentSection = (pos: number): null | keyof FileMode => {
-  //   switch (pos) {
-  //     case 0:
-  //       /* |drwxrwxrwx */ return "special";
-  //     case 1:
-  //       /* d|rwxrwxrwx */ return "special"; // TODO: -> user
-  //     case 2:
-  //       /* dr|wxrwxrwx */ return "user";
-  //     case 3:
-  //       /* drw|xrwxrwx */ return "user";
-  //     case 4:
-  //       /* drwx|rwxrwx */ return "user";
-  //     case 5:
-  //       /* drwxr|wxrwx */ return "group";
-  //     case 6:
-  //       /* drwxrw|xrwx */ return "group";
-  //     case 7:
-  //       /* drwxrwx|rwx */ return "group";
-  //     case 8:
-  //       /* drwxrwxr|wx */ return "other";
-  //     case 9:
-  //       /* drwxrwxrw|x */ return "other";
-  //     default:
-  //       /* drwxrwxrwx| */ return null;
-  //   }
-  // };
-  // const interpretFirstChar = () => "";
 
-  // const getTriadPosition = (pos: number): null | keyof Triad => {
-  //   if (pos === 0 || pos >= 10) return null; // |drwxrwxrwx, drwxrwxrwx|
-
-  //   switch ((pos - 1) % 3) {
-  //     case 0: // d|rwxrwxrwx drwx|rwxrwx drwxrwx|rwx
-  //       return "read";
-  //     case 1: // dr|wxrwxrwx drwxr|wxrwx drwxrwxr|wx
-  //       return "write";
-  //     case 2: // drw|xrwxrwx drwxrw|xrwx drwxrwxrw|x
-  //       return "execute";
-  //     default:
-  //       return null;
-  //   }
-  // };
   const _orders = {
     special: "-lbsdcp", // ordered by hightest bits -> lowest
     read: "-r",
     write: "-w",
     execute: { s: "S-xs", t: "T-xt" },
   };
-  // const getValueActions = (
-  //   section: keyof FileMode | null,
-  //   subsection: keyof Triad | null
-  // ): [(yn: boolean) => void, () => void] => {
-  //   // incr/decr, reset
-  //   let setTriadValue = (yn) => {
-  //     value[section][subsection] = yn;
-  //     value = value;
-  //   };
-  //   let incrDecr: (yn: boolean) => void;
 
-  //   switch (subsection) {
-  //     case "read":
-  //     case "write":
-  //       return [setTriadValue, () => setTriadValue(false)];
-  //     case "execute":
-  //       switch (section) {
-  //         case "user":
-  //         // S no-execute, setuid
-  //         // - no-execute, no-setuid
-  //         // x execute   , no-setuid
-  //         // s execute   , setuid
-  //         incrDecr = (up: boolean) => {
-  //           if (value.special.setuid) {
-  //             if (value.user.execute) value.special.setuid = up
-  //             else if (up) value.special.setuid = false
-  //         }
-  //         case "group":
-  //         // S no-execute, setgid
-  //         // - no-execute, no-setgid
-  //         // x execute   , no-setgid
-  //         // s execute   , setgid
-
-  //         case "other":
-  //         // T no-execute, sticky
-  //         // - no-execute, no-sticky
-  //         // x execute   , no-sticky
-  //         // t execute   , sticky
-
-  //         default:
-  //           return null; // something's wrong...
-  //       }
-  //     case null:
-  //     // handle special-group?
-  //   }
-  // };
   const getOrder = (pos: number): string => {
     switch (caretPosition) {
       case 0: // |drwxrwxrwx
@@ -183,14 +101,14 @@
         }
         break;
     }
-    value = parseStr(letters.join(""));
+    store.update(() => parseStr(letters.join("")));
     return;
   }
 
   function handleInput(
     e: Event & { currentTarget: EventTarget & HTMLInputElement }
   ) {
-    value = parseStr(e.currentTarget.value);
+    store.update(() => parseStr(e.currentTarget.value));
   }
   $: modeString = modeAsString(value);
 </script>
@@ -198,7 +116,7 @@
 <style>
   input {
     font-family: monospace;
-    max-width: 10ch;
+    width: 10ch;
   }
 </style>
 

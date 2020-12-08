@@ -1,7 +1,7 @@
 // https://man7.org/linux/man-pages/man7/inode.7.html
 // https://pubs.opengroup.org/onlinepubs/9699919799/utilities/ls.html
 // https://nixdoc.net/man-pages/FreeBSD/man2/stat.2.html
-
+// https://github.com/mirror/busybox/blob/6599e380ed5e1b1272a5e0e26183471d8b4b2051/libbb/mode_string.c
 // POSIX leaves the following symbolic constants to be defined in <sys/stat.h>:
 // S_IFSOCK             Socket.
 // S_IFLNK              Symbolic link.
@@ -80,7 +80,6 @@ const specialStrs: Record<string, SignificantName> = {
   c: "characterDevice",
   p: "namedPipe",
 };
-
 const _specialStrs = {
   symbolicLink: "l",
   blockDevice: "b",
@@ -108,7 +107,7 @@ export type FileMode = Permissions & {
 
 const maxU32 = Math.pow(2, 32);
 
-const parseNumber = (n: number): FileMode => {
+export const parseNumber = (n: number): FileMode => {
   if (n < 0 || n > maxU32) {
     throw new Error(
       `invalid file mode ${n}; file modes should be between 0 and 2^32 = ${maxU32}`
@@ -144,10 +143,19 @@ const asRwx = (t: Triad) => [
   t.execute ? "x" : "-",
 ];
 const asSpecial = (s: Special) =>
-  significantOrder
-    .map((name) => (s[name] ? _specialStrs[name] : ""))
-    .filter(Boolean)
-    .join("") || "-";
+  s["symbolicLink"]
+    ? _specialStrs["symbolicLink"]
+    : s["blockDevice"]
+    ? _specialStrs["blockDevice"]
+    : s["socket"]
+    ? _specialStrs["socket"]
+    : s["directory"]
+    ? _specialStrs["directory"]
+    : s["characterDevice"]
+    ? _specialStrs["characterDevice"]
+    : s["namedPipe"]
+    ? _specialStrs["namedPipe"]
+    : "-";
 
 type Bitmask = (u32: number) => boolean;
 const singleBitMask = (m: number): Bitmask => (u32: number): boolean =>
@@ -215,8 +223,8 @@ const parseOctalStr = (octal: string): FileMode => {
 const parseOctalNumber = parseNumber;
 export const parseOctal = stringOrNumber(parseOctalStr, parseOctalNumber);
 
-const blankTriad = () => ({ read: false, write: false, execute: false });
-const blankSpecial = () =>
+export const blankTriad = () => ({ read: false, write: false, execute: false });
+export const blankSpecial = () =>
   significantOrder.reduce(
     (a, name) => Object.assign(a, { [name]: false }),
     {} as Record<SignificantName, boolean>
@@ -232,7 +240,7 @@ export const parseStr = (s: string): FileMode => {
   const result = blankFileMode();
   if (s.length != 10) {
     throw new Error(
-      `invalid mode string '${s}': must be at least 10 characters`
+      `invalid mode string '${s}': must be 10 characters, is ${s.length}`
     );
   }
   let i = 0; // the index into the string s

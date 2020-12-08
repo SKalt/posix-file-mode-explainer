@@ -43,10 +43,8 @@
       case "ArrowUp": // 012|3 -> 013|3
         e.preventDefault();
         // TODO: increment value by the number at the caret
-        if (caretPosition == 0) {
-          incr()(0);
-        } else if (caretPosition < maxlength) {
-          incr()(caretPosition - 1);
+        if (caretPosition >= 0 && caretPosition < maxlength) {
+          incr()(caretPosition);
         } else if (caretPosition >= maxlength) {
           incr()(maxlength - 1);
         }
@@ -54,25 +52,24 @@
       case "ArrowDown": // 012|3 -> 011|3
         e.preventDefault();
         const decr = incr(-1);
-        if (caretPosition == 0) {
-          decr(1);
-        } else if (caretPosition < maxlength) {
-          decr(caretPosition - 1);
+        if (caretPosition >= 0 && caretPosition < maxlength) {
+          decr(caretPosition);
         } else if (caretPosition >= maxlength) {
           decr(maxlength - 1);
         }
         break;
       case "Backspace": // 012|3 -> 001|3
+        console.log({ caretPosition, key: e.key });
         e.preventDefault();
         if (caretPosition > 0) {
-          digits.splice(caretPosition, 1);
+          digits.splice(caretPosition - 1, 1);
           digits.unshift("0");
         }
         break;
       case "Delete": // 01|23 -> 001|3
         e.preventDefault();
         if (caretPosition < maxlength) {
-          digits.splice(caretPosition++, 1);
+          digits.splice(caretPosition, 1);
           digits.unshift("0");
         }
         break;
@@ -121,6 +118,6 @@
   {maxlength}
   {title}
   on:keydown={handleKeypress}
-  style="max-width: {maxlength}ch" />
+  style="width: {maxlength}ch" />
 
 <!-- TODO: undo/redo stack -->
