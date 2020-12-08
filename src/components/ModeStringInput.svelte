@@ -117,6 +117,8 @@
   input {
     font-family: monospace;
     width: 10ch;
+    border: none;
+    border-bottom: 1px solid;
   }
 </style>
 

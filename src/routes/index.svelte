@@ -49,17 +49,25 @@
     }
   }
   div.row {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr 3fr;
     width: 100%;
   }
 
-  :global(div.row *:first-child) {
-    flex-grow: 1;
-    text-align: right;
+  div.row span:first-child {
+    grid-column: 1;
+    /* flex-grow: 1; */
+    text-align: center;
     margin-right: 1em;
+    width: 100%;
+  }
+  div.row span:first-child::after {
+    content: ":";
+    text-align: right;
   }
   :global(div.row *:nth-child(2)) {
-    flex-grow: 1;
+    grid-column: 2;
+    width: 100%;
   }
 </style>
 
@@ -68,14 +76,13 @@
 </svelte:head>
 
 <div class="row">
-  <span style="width: {octalLength}ch">Octal:</span>
+  <span>Octal</span>
   <OctalInput bind:value={octal} maxlength={octalLength} />
 </div>
 <div class="row">
-  <span style="width: {modeStrLength}ch">Mode string:</span>
+  <span>Mode string</span>
   <ModeStringInput store={mode} />
 </div>
-
+<br />
 <ModeTable store={mode} />
-
 <ModeStringExplainer store={mode} />

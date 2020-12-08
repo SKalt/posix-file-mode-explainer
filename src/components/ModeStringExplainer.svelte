@@ -28,6 +28,7 @@
     }
   };
   let who: string;
+  let permission: string;
   let anySpecial: string;
   let text: string;
   $: selectedSection = getSection(selectedIndex);
@@ -41,13 +42,20 @@
       }[selectedSection] || "";
   }
   $: {
+    permission = ["read", "write", "execute"][(selectedIndex - 1) % 3] || "";
+  }
+  $: {
     let section = mode[selectedSection];
     let { sticky, setgid, setuid } = mode.special;
-    if ("executable" in section && (sticky || setgid || setuid)) {
-      const { executable } = section;
-      const conj = executable ? "and" : "but";
-      const prefix = `, ${conj} can `;
-      switch (who) {
+    if (
+      permission == "execute" &&
+      "execute" in section &&
+      (sticky || setgid || setuid)
+    ) {
+      const { execute } = section;
+      const conj = execute ? "and" : "but";
+      const prefix = `${conj} can `;
+      switch (selectedSection) {
         case "user":
           anySpecial = setuid ? prefix + "set the user id" : "";
           break;
@@ -56,9 +64,6 @@
           break;
         case "other":
           anySpecial = sticky ? `, ${conj} the file has the sticky bit` : "";
-          break;
-        default:
-          anySpecial = "!";
           break;
       }
     } else {
@@ -79,10 +84,9 @@
           "This file is a door (for inter-process communication between a client and server; only implemented in Solaris).",
       }[letters[0]];
     } else {
-      let permission =
-        ["read", "write", "execute"][(selectedIndex - 1) % 3] || "";
-      const conj = permission ? "" : "not";
-      text = ` can${conj} ${permission} the file${anySpecial}.`;
+      // let
+      const conj = mode[selectedSection][permission] ? "" : "not";
+      text = ` can${conj} ${permission} the file ${anySpecial}.`;
     }
   }
   function handleKeypress(

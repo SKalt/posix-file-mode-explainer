@@ -59,7 +59,6 @@
         }
         break;
       case "Backspace": // 012|3 -> 001|3
-        console.log({ caretPosition, key: e.key });
         e.preventDefault();
         if (caretPosition > 0) {
           digits.splice(caretPosition - 1, 1);
@@ -105,6 +104,8 @@
 
 <style>
   input {
+    border: none;
+    border-bottom: 1px solid;
     font-family: monospace;
   }
 </style>
@@ -118,6 +119,6 @@
   {maxlength}
   {title}
   on:keydown={handleKeypress}
-  style="width: {maxlength}ch" />
+  style="min-width: {maxlength}ch" />
 
 <!-- TODO: undo/redo stack -->
